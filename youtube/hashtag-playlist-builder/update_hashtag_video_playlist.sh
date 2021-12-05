@@ -74,7 +74,11 @@
 ## GOOGLE CREDENTIAL SETTINGS AND INSTRUCTIONS
 ###############################################
 
-# Go to your Google Cloud Platform Account and create a new project
+# If you don't already have a YouTube channel, you will need one
+# Sign into YouTube with your Google account
+# Create a new channel
+
+# Go to your Google Cloud Platform Account and create a new project, or you can also use the My First Project
 # Then go to APIs & Services, Dashboard, Enable APIs And Services, search for YouTube Data API v3, click on the search result, and choose Enable
 
 # Google API Key
@@ -121,7 +125,10 @@ ACCT_ID="MyAccount"
 # The hashtag search phrase!
 SEARCH_PHRASES=("doscember" "doscember2021")
 
-# The video playlist to update.  This would be a playlist that you have already created in your YouTube account, the ID will be a part of the URL when you navigate to it.
+# The video playlist to update. 
+# Note that you have to create a YouTube channel to make playlists.
+# The easiest place to create a new playlist is probably in YouTube Studio
+# The ID will be the last part of the URL (the part after list=) when you navigate to it.
 PLAYLIST=''
 
 # The allowed video start and end dates for adding new videos to your playlist (I do this to not get videos from past years hashtag events)
