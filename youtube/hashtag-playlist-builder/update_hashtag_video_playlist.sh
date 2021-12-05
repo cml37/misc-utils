@@ -11,6 +11,7 @@
 
 # QuickStart:
 # 1) Save script on a Linux system as update_hashtag_video_playlist.sh, let's say in a directory called /data/list
+#    (you will also want to make the script executable: chmod 755 /data/list/update_hashtag_video_playlist.sh)
 # 2) Update all variables in the script below under GOOGLE CREDENTIAL SETTINGS AND INSTRUCTIONS
 # 3) Update settings of interest in the script below under SPECIFIC PARAMETERS
 # 4) Update crontab to run this once per day, this example will run at 8 a.m. 
@@ -137,7 +138,7 @@ VIDEO_END_DATE="1/2/2022"
 
 
 ###############################################################################################
-AS A RULE OF THUMB, YOU SHOULDN'T HAVE TO UPDATE ANYTHING BELOW THIS LINE
+# AS A RULE OF THUMB, YOU SHOULDN'T HAVE TO UPDATE ANYTHING BELOW THIS LINE
 ###############################################################################################
 
 #------------------------------------------------------------------------------------------------
