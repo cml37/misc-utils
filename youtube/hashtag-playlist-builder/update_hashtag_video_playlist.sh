@@ -10,6 +10,7 @@
 ###############################################
 
 # QuickStart:
+# 0) make sure that jq is installed on your Linux environment: (for raspbian: sudo apt-get install jq)
 # 1) Save script on a Linux system as update_hashtag_video_playlist.sh, let's say in a directory called /data/list
 #    (you will also want to make the script executable: chmod 755 /data/list/update_hashtag_video_playlist.sh)
 # 2) Update all variables in the script below under GOOGLE CREDENTIAL SETTINGS AND INSTRUCTIONS
@@ -20,7 +21,7 @@
 # 5) Make sure that your playlist got updated as expected.. either in YouTube or by looking at some logs:
 #    /data/list/log/playlist_update_history.log
 #    /data/list/log/status.log
-#  6) Also, for advanced debugging, we do output the following logs as well:
+# 6) Also, for advanced debugging, we do output the following logs as well:
 #    /data/list/debug/playlist_addition_history.log
 #    /data/list/debug/raw_global_search_results_output.log
 #    /data/list/debug/raw_specific_video_search_output.log
