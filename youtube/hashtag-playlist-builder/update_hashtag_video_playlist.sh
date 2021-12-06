@@ -129,7 +129,7 @@ SEARCH_PHRASES=("doscember" "doscember2021")
 
 # The video playlist to update. 
 # Note that you have to create a YouTube channel to make playlists.
-# The easiest place to create a new playlist is probably in YouTube Studio
+# The easiest place to create a new playlist is probably in YouTube Studio.
 # The ID will be the last part of the URL (the part after list=) when you navigate to it.
 PLAYLIST=''
 
