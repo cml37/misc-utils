@@ -7,6 +7,9 @@
 #
 # 12/5/2021 Chris Lenderman
 #              Updated Version
+#
+# 12/17/2021 Chris Lenderman
+#              Add blacklist capabilities
 ###############################################
 
 # QuickStart:
@@ -137,6 +140,8 @@ PLAYLIST=''
 VIDEO_START_DATE="11/30/2021"
 VIDEO_END_DATE="1/2/2022"
 
+# Sometimes content creators get a little over zealous and add videos that are really not on point.  Videos to blacklist can be added here by video ID.
+BLACKLISTED_VIDEOS=("dGg8pFu2Ch8" "QqBZ6G_xFts")
 
 ###############################################################################################
 # AS A RULE OF THUMB, YOU SHOULDN'T HAVE TO UPDATE ANYTHING BELOW THIS LINE
@@ -273,7 +278,7 @@ function filter_search_results() {
   # Build up search commands and execute search
   for i in "${VIDEOS[@]}"
   do
-    if [[ ${#i} -gt 0 ]] ; then
+    if [[ ${#i} -gt 0 ]]; then
       COUNT=$COUNT+1
       VIDEO_SEARCH_LIST="$VIDEO_SEARCH_LIST$i%2C"
 
@@ -349,18 +354,30 @@ function update_playlist {
   --data "client_id=$GOOGLE_CLIENT_ID&client_secret=$GOOGLE_CLIENT_SECRET&refresh_token=$GOOGLE_REFRESH_TOKEN&grant_type=refresh_token" \
   https://accounts.google.com/o/oauth2/token | jq -r .access_token`
 
-  # Add each new video to the playlist.
+  # Add each new video to the playlist unless it is on the blacklist.
   for i in "${NEW_VIDEOS[@]}"
   do
-    echo "$ACCT_ID `date` New video added: $i " | tee -a $LOGPATH/playlist_update_history.log
-    DATA="{\"snippet\": { \"playlistId\": \"${PLAYLIST}\", \"resourceId\": {\"kind\": \"youtube#video\",\"videoId\": \"${i}\"}}}"
-    CURL_RESPONSE=`curl -s -X POST "https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&key=$GOOGLE_API_KEY" \
-     -H "Authorization: Bearer $GOOGLE_ACCESS_TOKEN" \
-     -H 'Content-Type: application/json' \
-     -d "$DATA"`
-    PLAYLIST_UPDATE_COST=$((PLAYLIST_UPDATE_COST+50))
-    # Uncomment if you wish to debug
-    echo $CURL_RESPONSE >> $DEBUGPATH/playlist_addition_history.txt
+
+    BLACKLISTED="false"
+    for j in "${BLACKLISTED_VIDEOS[@]}"
+    do
+      if [ "$j" = "$i" ]; then
+        BLACKLISTED="true"
+      fi
+    done
+
+    if [ "$BLACKLISTED" = "false" ]; then    
+      echo "$ACCT_ID `date` New video added: $i " | tee -a $LOGPATH/playlist_update_history.log
+      DATA="{\"snippet\": { \"playlistId\": \"${PLAYLIST}\", \"resourceId\": {\"kind\": \"youtube#video\",\"videoId\": \"${i}\"}}}"
+      CURL_RESPONSE=`curl -s -X POST "https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&key=$GOOGLE_API_KEY" \
+       -H "Authorization: Bearer $GOOGLE_ACCESS_TOKEN" \
+       -H 'Content-Type: application/json' \
+       -d "$DATA"`
+      PLAYLIST_UPDATE_COST=$((PLAYLIST_UPDATE_COST+50))
+      # Uncomment if you wish to debug
+      echo $CURL_RESPONSE >> $DEBUGPATH/playlist_addition_history.txt
+    fi
+
   done
 }
 
