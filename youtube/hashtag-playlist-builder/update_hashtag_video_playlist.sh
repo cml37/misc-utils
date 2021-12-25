@@ -13,7 +13,7 @@
 ###############################################
 
 # QuickStart:
-# 0) make sure that jq is installed on your Linux environment: (for raspbian: sudo apt-get install jq)
+# 0) make sure that jq and cURL are installed on your Linux environment: (for raspbian: sudo apt-get install jq && sudo apt-get install curl)
 # 1) Save script on a Linux system as update_hashtag_video_playlist.sh, let's say in a directory called /data/list
 #    (you will also want to make the script executable: chmod 755 /data/list/update_hashtag_video_playlist.sh)
 # 2) Update all variables in the script below under GOOGLE CREDENTIAL SETTINGS AND INSTRUCTIONS
