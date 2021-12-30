@@ -1,5 +1,5 @@
 #!/bin/bash
-###############################################
+##########################################################
 # YouTube Hashtag Playlist Maintainer Script
 # 
 # 9/28/2021 Chris Lenderman 
@@ -10,7 +10,10 @@
 #
 # 12/17/2021 Chris Lenderman
 #              Add blacklist capabilities
-###############################################
+#
+# 12/17/2021 Chris Lenderman
+#              Add additional blacklist capabilities
+##########################################################
 
 # QuickStart:
 # 0) make sure that jq and cURL are installed on your Linux environment: (for raspbian: sudo apt-get install jq && sudo apt-get install curl)
@@ -141,7 +144,10 @@ VIDEO_START_DATE="11/30/2021"
 VIDEO_END_DATE="1/2/2022"
 
 # Sometimes content creators get a little over zealous and add videos that are really not on point.  Videos to blacklist can be added here by video ID.
-BLACKLISTED_VIDEOS=("dGg8pFu2Ch8" "QqBZ6G_xFts")
+BLACKLISTED_VIDEOS='["dGg8pFu2Ch8","xlR5bP_V0UM"]'
+
+# And sometimes content creators are just completely off point.  Channels to blacklist can be added here by channel ID.
+BLACKLISTED_CHANNELS='["UCueJOS3ZjWyTtRU9bnx9XFw"]'
 
 ###############################################################################################
 # AS A RULE OF THUMB, YOU SHOULDN'T HAVE TO UPDATE ANYTHING BELOW THIS LINE
@@ -239,9 +245,17 @@ function perform_filtered_video_search {
 
   SEARCH_PHRASE=$(join_by '|' ${SEARCH_PHRASES[@]})
 
-  # For videos with tags, filter for the hashtag in the title, tags, or description, and only include videos between the dates desired that are not set to "premiere"
-  FILTERED_VIDEOS+=(`echo $RESULT | jq -c -r --arg START_DATE $START_DATE --arg END_DATE $END_DATE --arg SEARCH_PHRASE $SEARCH_PHRASE '
+  # For videos with tags, filter out blacklisted videos and channels, filter for the hashtag in the title, tags, or description, 
+  # and only include videos between the dates desired that are not set to "premiere"
+  FILTERED_VIDEOS+=(`echo $RESULT | jq -c -r \
+  --arg START_DATE $START_DATE \
+  --arg END_DATE $END_DATE \
+  --arg SEARCH_PHRASE $SEARCH_PHRASE \
+  --arg BLACKLISTED_CHANNELS $BLACKLISTED_CHANNELS \
+  --arg BLACKLISTED_VIDEOS $BLACKLISTED_VIDEOS '
   .items[] | 
+    select (.snippet.channelId as $bl | $BLACKLISTED_CHANNELS | index($bl) | not) |
+    select (.id as $id | $BLACKLISTED_VIDEOS | index($id) | not) |
     select((.snippet.publishedAt | fromdateiso8601 > ($START_DATE | tonumber)) and 
       (.snippet.publishedAt | fromdateiso8601 < ($END_DATE | tonumber))) | 
     select (.snippet.tags != null) | 
@@ -250,9 +264,17 @@ function perform_filtered_video_search {
       (.snippet.tags[] | test ($SEARCH_PHRASE; "i"))) | 
     select (.snippet.liveBroadcastContent | test ("none")) | .id'`)
 
-  # For videos without tags, filter for the hashtag in the title or description, and only include videos between the dates desired that are not set to "premiere"
-  FILTERED_VIDEOS+=(`echo $RESULT | jq -c -r --arg START_DATE $START_DATE --arg END_DATE $END_DATE --arg SEARCH_PHRASE $SEARCH_PHRASE '
+  # For videos without tags, filter out blacklisted videos and channels, filter for the hashtag in the title or description, 
+  # and only include videos between the dates desired that are not set to "premiere"
+  FILTERED_VIDEOS+=(`echo $RESULT | jq -c -r \
+  --arg START_DATE $START_DATE \
+  --arg END_DATE $END_DATE \
+  --arg SEARCH_PHRASE $SEARCH_PHRASE \
+  --arg BLACKLISTED_CHANNELS $BLACKLISTED_CHANNELS \
+  --arg BLACKLISTED_VIDEOS $BLACKLISTED_VIDEOS '
   .items[] | 
+    select (.snippet.channelId as $bl | $BLACKLISTED_CHANNELS | index($bl) | not) |
+    select (.id as $id | $BLACKLISTED_VIDEOS | index($id) | not) |
     select((.snippet.publishedAt | fromdateiso8601 > ($START_DATE | tonumber)) and 
       (.snippet.publishedAt | fromdateiso8601 < ($END_DATE | tonumber))) | 
     select (.snippet.tags == null) | 
@@ -354,30 +376,18 @@ function update_playlist {
   --data "client_id=$GOOGLE_CLIENT_ID&client_secret=$GOOGLE_CLIENT_SECRET&refresh_token=$GOOGLE_REFRESH_TOKEN&grant_type=refresh_token" \
   https://accounts.google.com/o/oauth2/token | jq -r .access_token`
 
-  # Add each new video to the playlist unless it is on the blacklist.
+  # Add each new video to the playlist.
   for i in "${NEW_VIDEOS[@]}"
   do
-
-    BLACKLISTED="false"
-    for j in "${BLACKLISTED_VIDEOS[@]}"
-    do
-      if [ "$j" = "$i" ]; then
-        BLACKLISTED="true"
-      fi
-    done
-
-    if [ "$BLACKLISTED" = "false" ]; then    
-      echo "$ACCT_ID `date` New video added: $i " | tee -a $LOGPATH/playlist_update_history.log
-      DATA="{\"snippet\": { \"playlistId\": \"${PLAYLIST}\", \"resourceId\": {\"kind\": \"youtube#video\",\"videoId\": \"${i}\"}}}"
-      CURL_RESPONSE=`curl -s -X POST "https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&key=$GOOGLE_API_KEY" \
-       -H "Authorization: Bearer $GOOGLE_ACCESS_TOKEN" \
-       -H 'Content-Type: application/json' \
-       -d "$DATA"`
-      PLAYLIST_UPDATE_COST=$((PLAYLIST_UPDATE_COST+50))
-      # Uncomment if you wish to debug
-      echo $CURL_RESPONSE >> $DEBUGPATH/playlist_addition_history.txt
-    fi
-
+    echo "$ACCT_ID `date` New video added: $i " | tee -a $LOGPATH/playlist_update_history.log
+    DATA="{\"snippet\": { \"playlistId\": \"${PLAYLIST}\", \"resourceId\": {\"kind\": \"youtube#video\",\"videoId\": \"${i}\"}}}"
+    CURL_RESPONSE=`curl -s -X POST "https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&key=$GOOGLE_API_KEY" \
+     -H "Authorization: Bearer $GOOGLE_ACCESS_TOKEN" \
+     -H 'Content-Type: application/json' \
+     -d "$DATA"`
+    PLAYLIST_UPDATE_COST=$((PLAYLIST_UPDATE_COST+50))
+    # Uncomment if you wish to debug
+    echo $CURL_RESPONSE >> $DEBUGPATH/playlist_addition_history.txt
   done
 }
 
