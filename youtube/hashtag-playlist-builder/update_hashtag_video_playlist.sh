@@ -98,8 +98,7 @@ GOOGLE_API_KEY=""
 # For User Type, choose External, and click Create
 # Give your "app" a name (any name is fine) and set the "user support email" (can be any email address of yours), then set the "developer contact email", then click Save and Continue
 # For Scopes, just click Save and Continue
-# For Test Users, just click Save and Continue
-# Then click back on OAuth Consent Screen and click Publish App, then click Confirm
+# For Test Users, click add and add your Gmail email address, then click Add, then click Save and Continue
 # Then go to APIs & Services, Credentials, Create Credentials, and create an OAuth Client ID
 # For application type, choose Desktop app, and give it a name, any name, then click Create
 # You will get a Client ID and Client Secret, set them here:
@@ -116,7 +115,7 @@ GOOGLE_CLIENT_SECRET=""
 # Next, export your GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, and this new "code" as GOOGLE_API_CODE.  Then call cURL to get your refresh token.
 # For example:
 #   export GOOGLE_CLIENT_ID=<your Client ID from above>
-#   export GOOGLE_CLIENT_SECRET=<your Client Secret from above
+#   export GOOGLE_CLIENT_SECRET=<your Client Secret from above>
 #   export GOOGLE_API_CODE=<the "code" that you got back from your web browser>
 #   curl --request POST --data "code=$GOOGLE_API_CODE&client_id=$GOOGLE_CLIENT_ID&client_secret=$GOOGLE_CLIENT_SECRET&redirect_uri=urn:ietf:wg:oauth:2.0:oob&grant_type=authorization_code" https://accounts.google.com/o/oauth2/token
 # You'll get back a refresh token as part of the response.  Go ahead and paste it here:
