@@ -13,6 +13,10 @@
 #
 # 12/29/2021 Chris Lenderman
 #              Add additional blacklist capabilities
+#
+# 11/16/2022 Chris Lenderman
+#              Update instructions due to changes in OAUTH2
+#              permissions (must now use "test" mode)
 ##########################################################
 
 # QuickStart:
@@ -130,7 +134,7 @@ ACCT_ID="MyAccount"
 ###############################################
 
 # The hashtag search phrase!
-SEARCH_PHRASES=("doscember" "doscember2021")
+SEARCH_PHRASES=("doscember" "doscember2022")
 
 # The video playlist to update. 
 # Note that you have to create a YouTube channel to make playlists.
@@ -139,8 +143,8 @@ SEARCH_PHRASES=("doscember" "doscember2021")
 PLAYLIST=''
 
 # The allowed video start and end dates for adding new videos to your playlist (I do this to not get videos from past years hashtag events)
-VIDEO_START_DATE="11/30/2021"
-VIDEO_END_DATE="1/2/2022"
+VIDEO_START_DATE="11/30/2022"
+VIDEO_END_DATE="1/2/2023"
 
 # Sometimes content creators get a little over zealous and add videos that are really not on point.  Videos to blacklist can be added here by video ID.
 BLACKLISTED_VIDEOS='["dGg8pFu2Ch8","xlR5bP_V0UM"]'
