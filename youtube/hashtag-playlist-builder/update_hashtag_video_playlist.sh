@@ -17,6 +17,9 @@
 # 11/16/2022 Chris Lenderman
 #              Update instructions due to changes in OAUTH2
 #              permissions (must now use "test" mode)
+#
+# 12/1/2022 Chris Lenderman
+#              Update instructions to show the "new" way to use production mode!
 ##########################################################
 
 # QuickStart:
@@ -102,15 +105,38 @@ GOOGLE_API_KEY=""
 # For User Type, choose External, and click Create
 # Give your "app" a name (any name is fine) and set the "user support email" (can be any email address of yours), then set the "developer contact email", then click Save and Continue
 # For Scopes, just click Save and Continue
-# For Test Users, click add and add your Gmail email address, then click Add, then click Save and Continue
+# For Test Users, just click Save and Continue
+# Then click back on OAuth Consent Screen and click Publish App, then click Confirm
 # Then go to APIs & Services, Credentials, Create Credentials, and create an OAuth Client ID
 # For application type, choose Desktop app, and give it a name, any name, then click Create
 # You will get a Client ID and Client Secret, set them here:
 GOOGLE_CLIENT_ID=""
 GOOGLE_CLIENT_SECRET=""
 
+# Install python3
+# Copy the following to a file called server.py, remove the "hash" from the beginning of each line
+
+#from http.server import HTTPServer, BaseHTTPRequestHandler
+#
+#class Serv(BaseHTTPRequestHandler):
+#
+#    def do_GET(self):
+#           from urllib.parse import urlparse
+#           query = urlparse(self.path).query
+#           query_components = dict(qc.split("=") for qc in query.split("&"))
+#           self.send_response(200)
+#           self.send_header("Content-type", "text/html; charset=utf-8")
+#           result = "<html>" + query_components["code"] + "</html>"
+#           self.send_header("Content-Length", len(result))
+#           self.end_headers()
+#           self.wfile.write(bytes(result,"utf-8")) 
+#
+#httpd = HTTPServer(('localhost',3000),Serv)
+#httpd.serve_forever()
+
+# Start the python http server by running "python3 server.py"
 # Replace <client_id> below with your Client ID and paste this in your web browser:
-# https://accounts.google.com/o/oauth2/v2/auth?scope=https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fyoutubepartner&response_type=code&client_id=<client_id>&redirect_uri=urn:ietf:wg:oauth:2.0:oob&access_type=offline
+# https://accounts.google.com/o/oauth2/v2/auth?scope=https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fyoutubepartner&response_type=code&client_id=<client_id>&redirect_uri=http://127.0.0.1:3000
 # Choose the account associated with the account that has your YouTube playlist that you want to update
 # Then choose your YouTube channel that owns the playlist
 # If prompted with "Google has not authorized this app", Click "advanced" and then "Go to <your Google Cloud Platform app name> (unsafe)"
@@ -121,7 +147,7 @@ GOOGLE_CLIENT_SECRET=""
 #   export GOOGLE_CLIENT_ID=<your Client ID from above>
 #   export GOOGLE_CLIENT_SECRET=<your Client Secret from above>
 #   export GOOGLE_API_CODE=<the "code" that you got back from your web browser>
-#   curl --request POST --data "code=$GOOGLE_API_CODE&client_id=$GOOGLE_CLIENT_ID&client_secret=$GOOGLE_CLIENT_SECRET&redirect_uri=urn:ietf:wg:oauth:2.0:oob&grant_type=authorization_code" https://accounts.google.com/o/oauth2/token
+#   curl --request POST --data "code=$GOOGLE_API_CODE&client_id=$GOOGLE_CLIENT_ID&client_secret=$GOOGLE_CLIENT_SECRET&redirect_uri=http://127.0.0.1:3000&grant_type=authorization_code" https://accounts.google.com/o/oauth2/token
 # You'll get back a refresh token as part of the response.  Go ahead and paste it here:
 GOOGLE_REFRESH_TOKEN=""
 
