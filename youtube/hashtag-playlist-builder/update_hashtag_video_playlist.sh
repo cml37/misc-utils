@@ -19,7 +19,8 @@
 #              permissions (must now use "test" mode)
 #
 # 12/1/2022 Chris Lenderman
-#              Update instructions to show the "new" way to use production mode!
+#              Update instructions to show the "new" way 
+#              to use production mode!
 ##########################################################
 
 # QuickStart:
