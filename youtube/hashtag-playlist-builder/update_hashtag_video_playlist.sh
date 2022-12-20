@@ -21,6 +21,9 @@
 # 12/1/2022 Chris Lenderman
 #              Update instructions to show the "new" way 
 #              to use production mode!
+# 12/20/2022 Chris Lenderman
+#              Optimize search to only search videos 
+#              published after a certain date
 ##########################################################
 
 # QuickStart:
@@ -230,8 +233,9 @@ function execute_search() {
 # Performs a global search given a search phrase
 function perform_global_search() {
   
+  PUBLISHED_AFTER=`date -d $VIDEO_START_DATE +%FT%T.%3NZ`
   # Calculate the search URL
-  SEARCH_URL="https://www.googleapis.com/youtube/v3/search?part=snippet&q=%23%23$SEARCH_PHRASE&key=$GOOGLE_API_KEY&maxResults=50"
+  SEARCH_URL="https://www.googleapis.com/youtube/v3/search?type=video&part=snippet&q=%23%23$SEARCH_PHRASE&key=$GOOGLE_API_KEY&maxResults=50&publishedAfter=$PUBLISHED_AFTER"
 
   if [[ ! -z "$NEXT_PAGE_TOKEN" ]]; then
     SEARCH_URL=" $SEARCH_URL&pageToken=$NEXT_PAGE_TOKEN"
@@ -250,7 +254,7 @@ function perform_global_search() {
   # Determine what the next page token to get the next page of search results
   NEXT_PAGE_TOKEN=`echo $RESULT | jq -r '.nextPageToken'`
 
-  # Get a list of videos from the search results.  We could improve this by only searching for "video" type in our original search
+  # Get a list of videos from the search results.
   VIDEOS+=(`echo $RESULT  | jq -r ' .items[] | select ((.id.kind  == "youtube#video")) | .id.videoId'`)
 }
 
