@@ -476,7 +476,7 @@ function perform_filtered_blacklisted_video_search {
 # Remove any videos on the blacklist or for channels that are on the blacklist
 function remove_blacklisted_videos() {
 
-  echo "$ACCT_ID `date` Removing videos from playlist that are blacklisted or belong to blacklisted channels" | tee -a $LOGPATH/status.log
+  echo "$ACCT_ID `date` Removing Blacklisted Videos from Playlist" | tee -a $LOGPATH/status.log
 
   # Load the playlist
   PLAYLIST=(`cat $DATAPATH/playlist.txt`)
