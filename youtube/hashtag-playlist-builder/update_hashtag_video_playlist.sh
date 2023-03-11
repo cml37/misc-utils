@@ -31,6 +31,7 @@
 #              if they are added to the video or channel blacklist
 ##########################################################
 
+
 # QuickStart:
 # 0) make sure that jq and cURL are installed on your Linux environment: (for raspbian: sudo apt-get install jq && sudo apt-get install curl)
 # 1) Save script on a Linux system as update_hashtag_video_playlist.sh, let's say in a directory called /data/list
@@ -42,11 +43,14 @@
 #    0 8 * * *  /data/list/update_hashtag_video_playlist.sh
 # 5) Make sure that your playlist got updated as expected.. either in YouTube or by looking at some logs:
 #    /data/list/log/playlist_update_history.log
+#    /data/list/log/playlist_remove_history.log
 #    /data/list/log/status.log
 # 6) Also, for advanced debugging, we do output the following logs as well:
 #    /data/list/debug/playlist_addition_history.log
 #    /data/list/debug/raw_global_search_results_output.log
 #    /data/list/debug/raw_specific_video_search_output.log
+#    /data/list/debug/raw_playlist_output.log
+#    /data/list/debug/raw_specific_blacklist_video_search_output
 
 
 # NOTE: This script is a work in progress.  
@@ -76,7 +80,7 @@
 # 7) Compare the playlist to videos that made the cut
 # 8) For any videos that made the cut and are not in the playlist, add them to the playlist
 #
-# Notice how we NEVER remove an existing video from the playlist or rebuild the playlist, we only ever update it
+# Notice how we NEVER remove an existing video from the playlist (except for blacklisted videos) or rebuild the playlist, we only ever update it
 
 
 # YouTube Data APIs used in this script:
@@ -92,6 +96,9 @@
 #
 #  POST https://www.googleapis.com/youtube/v3/playlistItems (PlaylistItems: insert)
 #    Docs: https://developers.google.com/youtube/v3/docs/playlistItems/insert
+#
+#  DELETE https://www.googleapis.com/youtube/v3/playlistItems (PlaylistItems: delete)
+#    Docs: https://developers.google.com/youtube/v3/docs/playlistItems/delete
 
 
 ###############################################
@@ -407,8 +414,9 @@ function update_playlist {
     NEXT_PAGE_PLAYLIST_TOKEN=`echo $RESULT | jq -r '.nextPageToken'`
   done 
 
-  # Delete the old playlist to ID map, we are about to regenerate it
-  rm $DATAPATH/playlist_to_id_map.txt
+  # Clear out old playlist to ID map, we are about to regenerate it
+  rm $DATAPATH/playlist_to_id_map.txt 2> /dev/null
+  touch $DATAPATH/playlist_to_id_map.txt
 
   # Sort the result
   rm $DATAPATH/playlist.txt 2> /dev/null
@@ -540,6 +548,11 @@ function remove_blacklisted_videos() {
      -H 'Content-Type: application/json' \
      -d "$DATA"`
     PLAYLIST_UPDATE_COST=$((PLAYLIST_UPDATE_COST+50))
+
+    # Remove the video from our on-disk playlist, playlist map, and video list
+    sed -i '/^'"$i"'.*/d' $DATAPATH/playlist.txt
+    sed -i '/^'"$i"'.*/d' $DATAPATH/playlist_to_id_map.txt
+    sed -i '/^'"$i"'.*/d' $DATAPATH/video_list.txt
 
     # Uncomment if you wish to debug
     if [ -n "$CURL_RESPONSE" ]; then
