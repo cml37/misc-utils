@@ -25,6 +25,10 @@
 # 12/20/2022 Chris Lenderman
 #              Optimize search to only search videos 
 #              published after a certain date
+#
+# 3/11/2023 Chris Lenderman
+#              Add ability to automatically delete videos from the playlist
+#              if they are added to the video or channel blacklist
 ##########################################################
 
 # QuickStart:
@@ -326,6 +330,7 @@ function filter_search_results() {
 
   COUNT=0
   SEARCH_URL=""
+  VIDEO_SEARCH_LIST=""
 
   FILTERED_VIDEOS=()
 
@@ -375,11 +380,17 @@ function update_playlist {
   SEARCH_URL="https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&maxResults=50&playlistId=${PLAYLIST}&key=$GOOGLE_API_KEY"
   RESULT=`curl -s -X GET $SEARCH_URL`
   PLAYLIST_URL_COST=$((PLAYLIST_URL_COST+1))
+
+  # Uncomment if you want to debug
+  rm $DEBUGPATH/raw_playlist_output.txt 2> /dev/null
+  echo $RESULT>> $DEBUGPATH/raw_playlist_output.txt 
  
   NEXT_PAGE_PLAYLIST_TOKEN=`echo $RESULT | jq -r '.nextPageToken'`
 
   # Filter the video IDs from the return results
+  # Also, create a list that correlates video IDs to playlist item IDs
   VIDEOS_PLAYLIST=(`echo $RESULT | jq -c -r ' .items[].snippet.resourceId.videoId'`)
+  VIDEOS_PLAYLIST_ITEM_ID=(`echo $RESULT | jq -c -r ' .items[].id'`)
 
   # Get subsequent pages of the playlist and filter results accordingly
   while [[ ! $NEXT_PAGE_PLAYLIST_TOKEN == "null" ]]
@@ -387,16 +398,25 @@ function update_playlist {
     CURL_CMD=" $SEARCH_URL&pageToken=$NEXT_PAGE_PLAYLIST_TOKEN"
     RESULT=`curl -s -X GET $CURL_CMD`
     PLAYLIST_URL_COST=$((PLAYLIST_URL_COST+1))
+
+    # Uncomment if you want to debug
+    echo $RESULT>> $DEBUGPATH/raw_playlist_output.txt 
+
     VIDEOS_PLAYLIST+=(`echo $RESULT | jq -c -r ' .items[].snippet.resourceId.videoId'`)
+    VIDEOS_PLAYLIST_ITEM_ID+=(`echo $RESULT | jq -c -r ' .items[].id'`)
     NEXT_PAGE_PLAYLIST_TOKEN=`echo $RESULT | jq -r '.nextPageToken'`
   done 
+
+  # Delete the old playlist to ID map, we are about to regenerate it
+  rm $DATAPATH/playlist_to_id_map.txt
 
   # Sort the result
   rm $DATAPATH/playlist.txt 2> /dev/null
   touch $DATAPATH/playlist_tmp.txt
-  for i in "${VIDEOS_PLAYLIST[@]}"
+  for i in "${!VIDEOS_PLAYLIST[@]}"
   do
-    echo $i >> $DATAPATH/playlist_tmp.txt
+    echo "${VIDEOS_PLAYLIST[$i]}" >> $DATAPATH/playlist_tmp.txt
+    echo "${VIDEOS_PLAYLIST[$i]} ${VIDEOS_PLAYLIST_ITEM_ID[$i]}" >> $DATAPATH/playlist_to_id_map.txt
   done
 
   sort $DATAPATH/playlist_tmp.txt > $DATAPATH/playlist.txt
@@ -421,8 +441,110 @@ function update_playlist {
      -H 'Content-Type: application/json' \
      -d "$DATA"`
     PLAYLIST_UPDATE_COST=$((PLAYLIST_UPDATE_COST+50))
+
     # Uncomment if you wish to debug
     echo $CURL_RESPONSE >> $DEBUGPATH/playlist_addition_history.txt
+  done
+}
+
+
+# Performs a filtered blacklist video search given a video search list
+function perform_filtered_blacklisted_video_search {
+
+  # Perform the search, removing the last three characters from the search list since they are a stray delimiter
+  CURL_CMD="https://www.googleapis.com/youtube/v3/videos?part=snippet&id=${VIDEO_SEARCH_LIST::-3}&key=$GOOGLE_API_KEY"
+
+  # Uncomment if you wish to debug
+  echo $CURL_CMD >> $DEBUGPATH/raw_specific_blacklist_video_search_output.txt 
+
+  RESULT=`curl -s -X GET $CURL_CMD`
+  VIDEOS_SEARCH_COST=$((VIDEOS_SEARCH_COST+1))
+ 
+  # Uncomment if you wish to debug
+  echo $RESULT >> $DEBUGPATH/raw_specific_blacklist_video_search_output.txt 
+
+  # Get blacklisted videos, which includes videos on the blacklist or videos on a blacklisted channel
+  FILTERED_BLACKLISTED_VIDEOS+=(`echo $RESULT | jq -c -r \
+  --arg BLACKLISTED_CHANNELS $BLACKLISTED_CHANNELS \
+  --arg BLACKLISTED_VIDEOS $BLACKLISTED_VIDEOS '
+  .items[] | 
+    select ((.snippet.channelId as $bl | $BLACKLISTED_CHANNELS | index($bl)) or
+      (.id as $id | $BLACKLISTED_VIDEOS | index($id))) | .id'`)
+}
+
+
+# Remove any videos on the blacklist or for channels that are on the blacklist
+function remove_blacklisted_videos() {
+
+  echo "$ACCT_ID `date` Removing videos from playlist that are blacklisted or belong to blacklisted channels" | tee -a $LOGPATH/status.log
+
+  # Load the playlist
+  PLAYLIST=(`cat $DATAPATH/playlist.txt`)
+
+  COUNT=0
+  SEARCH_URL=""
+  VIDEO_SEARCH_LIST=""
+
+  FILTERED_BLACKLISTED_VIDEOS=()
+
+  # Uncomment if you want to debug
+  rm $DEBUGPATH/raw_specific_blacklisted_video_search_output.txt 2> /dev/null
+    
+  # Build up search commands and execute search
+  for i in "${PLAYLIST[@]}"
+  do
+    if [[ ${#i} -gt 0 ]]; then
+      COUNT=$COUNT+1
+      VIDEO_SEARCH_LIST="$VIDEO_SEARCH_LIST$i%2C"
+
+      if ! (( COUNT % 50))
+      then
+        perform_filtered_blacklisted_video_search 
+        VIDEO_SEARCH_LIST=""
+      fi
+    fi
+  done
+
+  # Perform final search
+  if (( COUNT % 50))
+  then
+      perform_filtered_blacklisted_video_search
+  fi
+
+  touch $DATAPATH/blacklist_video_list_tmp.txt
+  # Sort the result
+  for i in "${FILTERED_BLACKLISTED_VIDEOS[@]}"
+  do
+    echo $i >> $DATAPATH/blacklist_video_list_tmp.txt
+  done
+
+  sort $DATAPATH/blacklist_video_list_tmp.txt | uniq > $DATAPATH/blacklist_video_list.txt
+  rm $DATAPATH/blacklist_video_list_tmp.txt
+  
+  VIDEOS_TO_REMOVE=(`comm -12 $DATAPATH/playlist.txt $DATAPATH/blacklist_video_list.txt`)
+
+  # Get an access token that can be used to modify the playlist  
+  GOOGLE_ACCESS_TOKEN=`curl -s \
+  --request POST \
+  --data "client_id=$GOOGLE_CLIENT_ID&client_secret=$GOOGLE_CLIENT_SECRET&refresh_token=$GOOGLE_REFRESH_TOKEN&grant_type=refresh_token" \
+  https://accounts.google.com/o/oauth2/token | jq -r .access_token`
+
+  # Remove each video that should be blacklisted from the playlist.
+  for i in "${VIDEOS_TO_REMOVE[@]}"
+  do
+    PLAYLIST_VIDEO_ID=`cat $DATAPATH/playlist_to_id_map.txt | grep $i | cut -d ' ' -f2`
+    echo "$ACCT_ID `date` Removing blacklisted video: $i with playlist video id $PLAYLIST_VIDEO_ID" | tee -a $LOGPATH/playlist_remove_history.log
+    
+    CURL_RESPONSE=`curl -s -X DELETE "https://www.googleapis.com/youtube/v3/playlistItems?id=$PLAYLIST_VIDEO_ID&key=$GOOGLE_API_KEY" \
+     -H "Authorization: Bearer $GOOGLE_ACCESS_TOKEN" \
+     -H 'Content-Type: application/json' \
+     -d "$DATA"`
+    PLAYLIST_UPDATE_COST=$((PLAYLIST_UPDATE_COST+50))
+
+    # Uncomment if you wish to debug
+    if [ -n "$CURL_RESPONSE" ]; then
+      echo $CURL_RESPONSE >> $DEBUGPATH/playlist_remove_history.txt
+    fi
   done
 }
 
@@ -475,6 +597,9 @@ filter_search_results
 
 # Update the playlist
 update_playlist
+
+# Remove any videos that are on the playlist that are on the channel or video blacklist
+remove_blacklisted_videos
 
 # Output Cost Accounting Data to the status log
 output_cost_accounting_data
