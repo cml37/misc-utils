@@ -37,7 +37,7 @@ To the end of the path, add the following:
   ;C:\progra~1\java\jre\bin
 Click Ok, then OK
 
-grab my cacerts keystore file: https://github.com/cml37/misc-utils/nabu/adapter/WinXP/resources/cacerts
+grab my cacerts keystore file: https://github.com/cml37/misc-utils/blob/main/nabu/adapter/WinXP/resources/cacerts
 Copy my cacerts keystore file to C:\program files\java\jre\lib\security (overwriting the version there)
 Note: For the curious, I basically downloaded all certs in the cert chain for nabunetwork.com and added them to cacerts using Java "keytool"
 
