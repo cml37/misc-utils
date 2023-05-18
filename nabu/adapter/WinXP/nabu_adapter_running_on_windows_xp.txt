@@ -1,14 +1,15 @@
-====================================================================
-       Operating System Prep 
-====================================================================
+======================
+Operating System Prep
+======================
 Install Windows XP
 Install Windows XP Service Pack 1: https://www.techspot.com/drivers/driver/file/information/1130/
 Install Windows XP Service Pack 3: https://download.cnet.com/Microsoft-Windows-XP-Service-Pack-3/3000-18513_4-190061.html
 Note: You might be able to use the unofficial Windows XP Service Pack 4 instead of Service Pack 1 and Service Pack 3, I didn't try it
 
-====================================================================
-       RS422 Driver Prep
-====================================================================
+
+======================
+RS422 Driver Prep
+======================
 Note: This procedure assumes that you have an adapter with the FTDI chipset like the DTech USB
 
 Download FTDI Chip drivers: https://www.ftdichip.com/Drivers/CDM/CDM%202.08.24%20WHQL%20Certified.zip
@@ -19,9 +20,10 @@ After installing the driver, open device manager and find the "unknown serial de
 Double click on the unknown serial device, then select Reinstall, then navigate to C:\ftdi
 Make a note of the serial port assigned in device manager (probably COM3)
 
-====================================================================
-       Java 8 Prep
-====================================================================
+
+======================
+Java 8 Prep
+======================
 Download JavaNabuAdapter.jar latest release: https://github.com/cml37/JavaNabuAdapter/releases
 Copy it to C:\nabu on the Windows XP machine
 
@@ -42,9 +44,9 @@ Copy my cacerts keystore file to C:\program files\java\jre\lib\security (overwri
 Note: For the curious, I basically downloaded all certs in the cert chain for nabunetwork.com and added them to cacerts using Java "keytool"
 
 
---------------------------------------
-       Running the Adapter
---------------------------------------
+======================
+Running the Adapter
+======================
 Launch the adapter from a command prompt using the serial port from device manager above (quite possibly COM3, so we will show that here):
   C:
   cd NABU
