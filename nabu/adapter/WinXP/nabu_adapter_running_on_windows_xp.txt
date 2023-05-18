@@ -15,10 +15,31 @@ Note: This procedure assumes that you have an adapter with the FTDI chipset like
 Download FTDI Chip drivers: https://www.ftdichip.com/Drivers/CDM/CDM%202.08.24%20WHQL%20Certified.zip
 Unzip the folder to C:\ftdi on the Windows XP machine
 Plug in RS422 adapter to the Windows XP computer
-When prompted, choose to specify install location, and navigate to C:\ftdi
-After installing the driver, open device manager and find the "unknown serial device"
-Double click on the unknown serial device, then select Reinstall, then navigate to C:\ftdi
-Make a note of the serial port assigned in device manager (probably COM3)
+The "Found New Hardware Wizard" will appear
+ * Choose "No, not this time"
+ * Next
+ * "Install from a list or specified location (Advanced)"
+ * Next
+ * Check "Include this location in the search"
+ * For location, put in "C:\ftdi"
+ * Next
+ * Finish
+Once complete, the "Found New Hardware Wizard" will appear again
+ * Choose "No, not this time"
+ * Next
+ * "Install from a list or specified location (Advanced)"
+ * Next
+ * Check "Include this location in the search"
+ * For location, put in "C:\ftdi"
+ * Next
+ * Finish
+After installing the driver, find the serial port number
+ * Right click on "My Computer"
+ * Select "Properties"
+ * Select "Hardware"
+ * Click on "Device Manager"
+ * Expand Ports (COM & LPT)
+ * Make a note of the serial port (most likely COM3)
 
 
 ======================
@@ -30,17 +51,17 @@ Copy it to C:\nabu on the Windows XP machine
 Download Java 8 for Windows XP: http://sourceforge.net/projects/java8forwindowsxp/files/x86/jre1.8.0_40-x86.exe/download
 Install it (it is in Spanish, just click through everything)
 
-Navigate to C:\program files\java
+Navigate to C:\Program Files\Java
 rename the jre1.8.0_40 directory to be just jre
 
-Right click on my computer, then properties, then advanced, then environment variables
+Right click on my computer, then Properties, then Advanced, then Environment Variables
 Under System Variables, click on "Path", then Edit
 To the end of the path, add the following:
   ;C:\progra~1\java\jre\bin
-Click Ok, then OK
+Click Ok, then OK, then OK
 
-grab my cacerts keystore file: https://github.com/cml37/misc-utils/blob/main/nabu/adapter/WinXP/resources/cacerts
-Copy my cacerts keystore file to C:\program files\java\jre\lib\security (overwriting the version there)
+Grab my cacerts keystore file: https://github.com/cml37/misc-utils/blob/main/nabu/adapter/WinXP/resources/cacerts
+Copy my cacerts keystore file to C:\Program Files\Java\jre\lib\security (overwriting the version there)
 Note: For the curious, I basically downloaded all certs in the cert chain for nabunetwork.com and added them to cacerts using Java "keytool"
 
 
@@ -49,9 +70,9 @@ Running the Adapter
 ======================
 Launch the adapter from a command prompt using the serial port from device manager above (quite possibly COM3, so we will show that here):
   C:
-  cd NABU
+  cd \nabu
   java -jar JavaNabuAdapter.jar -Mode Serial -Port COM3 -path headless
 
-If you want CP/M to work, you will also need to copy the contents of the "cpm" directory from the Nabunetwork.com adaptor to C:\NABU\cpm
+If you want CP/M to work, you will also need to copy the contents of the "cpm" directory from the Nabunetwork.com adaptor to C:\nabu\cpm
 
 That's it!
