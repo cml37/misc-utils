@@ -1,0 +1,53 @@
+======================
+Operating System Prep
+======================
+Install Windows 98 Second Edition
+
+
+======================
+RS422 Driver Prep
+======================
+Note: This procedure assumes that you have an adapter with the FTDI chipset like the DTech USB
+
+Download FTDI Chip drivers: https://www.ftdichip.com/Drivers/VCP/Win98/R10906.zip
+Unzip the folder to C:\ftdi on the Windows 98 machine
+Plug in RS422 adapter to the Windows 98 computer
+
+Step through the "Found New Hardware Wizard" 
+ * Point to C:\ftdi when prompted
+After installing the driver, find the serial port number
+ * Right click on "My Computer"
+ * Select "Properties"
+ * Click on "Device Manager"
+ * Expand Ports (COM & LPT)
+ * Make a note of the serial port (most likely COM1)
+
+
+======================
+Java 5 Prep
+======================
+Download JavaNabuAdapter.zip for Java 5 latest release: https://github.com/cml37/JavaNabuAdapter-java5/releases
+Unzip it to C:\nabu on the Windows 98 machine
+ * You should have a JavaNabuAdapter.jar and JavaNabuAdapter_lib directory
+
+Download Java 5: https://mirror.nforce.com/pub/drivers/java_jre/jre-1_5_0_22-windows-i586-p.exe
+Install Java 5, just click through the selections
+
+Launch a command prompt
+edit C:\autoexec.bat
+Add the following line to the bottom of the file
+  PATH=%PATH%;C:\progra~1\java\jre1.5.0_22\bin
+Save and exit
+
+
+======================
+Running the Adapter
+======================
+Launch the adapter from a command prompt using the serial port from device manager above (quite possibly COM1, so we will show that here):
+  C:
+  cd \nabu
+  java -jar JavaNabuAdapter.jar -Mode Serial -Port COM1 -path headless
+
+If you want CP/M to work, you will also need to copy the contents of the "cpm" directory from the Nabunetwork.com adaptor to C:\nabu\cpm
+
+That's it!
