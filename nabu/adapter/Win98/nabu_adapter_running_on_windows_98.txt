@@ -13,8 +13,16 @@ Download FTDI Chip drivers: https://www.ftdichip.com/Drivers/VCP/Win98/R10906.zi
 Unzip the folder to C:\ftdi on the Windows 98 machine
 Plug in RS422 adapter to the Windows 98 computer
 
-Step through the "Found New Hardware Wizard" 
- * Point to C:\ftdi when prompted
+Step through the "Add New Hardware Wizard"
+ * Next
+ * Select "Search for the best driver for your device"
+ * Next
+ * Click "Specify a location"
+ * Type in C:\ftdi\R10906 in the box
+ * Next
+ * Next
+ * Finish
+ 
 After installing the driver, find the serial port number
  * Right click on "My Computer"
  * Select "Properties"
@@ -32,12 +40,17 @@ Unzip it to C:\nabu on the Windows 98 machine
 
 Download Java 5: https://mirror.nforce.com/pub/drivers/java_jre/jre-1_5_0_22-windows-i586-p.exe
 Install Java 5, just click through the selections
+  * Typical Setup
+  * Accept >
+  * Finish
+  * Yes to restart
 
-Launch a command prompt
-edit C:\autoexec.bat
-Add the following line to the bottom of the file
-  PATH=%PATH%;C:\progra~1\java\jre1.5.0_22\bin
-Save and exit
+Add java to the path statement
+  * Launch a command prompt
+  * edit C:\autoexec.bat
+  * Add the following line to the bottom of the file
+    PATH=%PATH%;C:\progra~1\java\jre1.5.0_22\bin
+ * Save and exit
 
 
 ======================
