@@ -61,6 +61,6 @@ Launch the adapter from a command prompt using the serial port from device manag
   cd \nabu
   java -jar JavaNabuAdapter.jar -Mode Serial -Port COM1 -path headless
 
-If you want CP/M to work, you will also need to copy the contents of the "cpm" directory from the Nabunetwork.com adaptor to C:\nabu\cpm
+If you want CP/M to work, you will also need to copy the contents of the "cpm" directory from the thenabunetwork.com adaptor to C:\nabu\cpm
 
 That's it!
